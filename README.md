@@ -11,7 +11,7 @@ This is not affiliated with or endorsed by Strava. It's a personal project built
 - Handles OAuth token refresh automatically (Strava tokens expire every 6 hours)
 - Formats output with sport-specific stats, emoji labels, and markdown tables
 - Supports bulk sync to pull your full activity history into the local vault
-- Runs as a Docker container with SSE transport for network-wide access
+- Runs as a Docker container with Streamable HTTP transport for network-wide access
 
 ## Why a server instead of running locally?
 
@@ -167,7 +167,7 @@ The server starts on port 18201 by default. Change it with `STRAVA_MCP_PORT` in 
 
 ## Connecting to Claude Code
 
-Once the container is running, you need to register it as an MCP server so Claude Code can use the tools. The SSE endpoint is `http://YOUR_SERVER_IP:18201/sse`.
+Once the container is running, you need to register it as an MCP server so Claude Code can use the tools. The MCP endpoint is `http://YOUR_SERVER_IP:18201/mcp` (Streamable HTTP).
 
 **Which IP to use:** Use the IP of the machine running the Docker container, not `localhost` (unless Claude Code runs on the same machine). If you're on a Tailscale network, use the Tailscale IP. If running everything on one machine, `localhost` or `127.0.0.1` works.
 
@@ -177,10 +177,10 @@ Via CLI (recommended):
 
 ```bash
 # With auth token:
-claude mcp add strava http://YOUR_SERVER_IP:18201/sse --transport sse -H "Authorization: Bearer YOUR_MCP_AUTH_TOKEN"
+claude mcp add strava http://YOUR_SERVER_IP:18201/mcp --transport http -H "Authorization: Bearer YOUR_MCP_AUTH_TOKEN"
 
 # Without auth:
-claude mcp add strava http://YOUR_SERVER_IP:18201/sse --transport sse
+claude mcp add strava http://YOUR_SERVER_IP:18201/mcp --transport http
 ```
 
 Or add it to your MCP config JSON manually:
@@ -189,8 +189,8 @@ Or add it to your MCP config JSON manually:
 {
   "mcpServers": {
     "strava": {
-      "type": "sse",
-      "url": "http://YOUR_SERVER_IP:18201/sse",
+      "type": "http",
+      "url": "http://YOUR_SERVER_IP:18201/mcp",
       "headers": {
         "Authorization": "Bearer YOUR_MCP_AUTH_TOKEN"
       }
@@ -198,6 +198,8 @@ Or add it to your MCP config JSON manually:
   }
 }
 ```
+
+> Previously used the HTTP+SSE transport (`/sse` endpoint) which was deprecated in the MCP spec 2025-03-26. Migrated to Streamable HTTP (MCP spec 2025-06-18) in v0.2.0. Existing clients must re-register with the new URL and transport.
 
 **Verify it works:** Restart Claude Code and ask something like "What are my recent Strava activities?" If the MCP connection is healthy, Claude will call the `get_recent_activities` tool and return your data. You can also run `get_cache_stats` to confirm the server is responding.
 

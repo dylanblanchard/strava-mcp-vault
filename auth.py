@@ -5,7 +5,9 @@ must include a matching Authorization: Bearer <token> header. If the
 env var is not set, all requests are allowed (backwards compatible).
 
 Uses a pure ASGI middleware instead of BaseHTTPMiddleware to avoid
-assertion errors with SSE streaming responses.
+assertion errors with the long-lived streaming responses that both
+Streamable HTTP (the current MCP transport) and SSE (the deprecated one)
+emit. Pure ASGI middleware is transport-agnostic.
 """
 
 import logging
@@ -18,7 +20,8 @@ class BearerAuthMiddleware:
     """Pure ASGI middleware for bearer token auth.
 
     Unlike BaseHTTPMiddleware, this does not wrap the response stream
-    and is fully compatible with SSE long-lived connections.
+    and is fully compatible with long-lived streaming connections
+    (Streamable HTTP and the deprecated HTTP+SSE).
     """
 
     def __init__(self, app, token: str):

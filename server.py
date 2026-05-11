@@ -355,6 +355,10 @@ if __name__ == "__main__":
 
     from auth import maybe_add_auth
 
-    app = mcp.sse_app()
+    # Streamable HTTP transport (MCP spec 2025-06-18). Replaces the
+    # deprecated HTTP+SSE transport from 2024-11-05. Single /mcp endpoint
+    # that serves POST (client -> server) and GET (server -> client SSE
+    # stream) on the same path.
+    app = mcp.streamable_http_app()
     app = maybe_add_auth(app)
     uvicorn.run(app, host="0.0.0.0", port=port)
