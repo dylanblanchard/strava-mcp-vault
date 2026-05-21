@@ -353,13 +353,17 @@ async def sync_activities(days_back: int = 0) -> str:
 if __name__ == "__main__":
     import uvicorn
 
-    from auth import add_health_check, maybe_add_auth
+    from auth import add_health_check
 
     # Streamable HTTP transport (MCP spec 2025-06-18). Replaces the
     # deprecated HTTP+SSE transport from 2024-11-05. Single /mcp endpoint
     # that serves POST (client -> server) and GET (server -> client SSE
     # stream) on the same path.
+    #
+    # Auth middleware removed: Claude.ai Connectors have no way to pass a
+    # custom Authorization: Bearer header, so bearer token auth is
+    # incompatible with the Connector UI. For a personal private deployment
+    # the unguessable Railway URL is sufficient protection.
     app = mcp.streamable_http_app()
-    app = maybe_add_auth(app)
-    app = add_health_check(app)  # outermost: /health bypasses auth
+    app = add_health_check(app)
     uvicorn.run(app, host="0.0.0.0", port=port)
