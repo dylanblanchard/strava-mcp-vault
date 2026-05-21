@@ -64,3 +64,25 @@ def maybe_add_auth(app):
         return app
     logger.info("MCP endpoint authentication enabled")
     return BearerAuthMiddleware(app, token=token)
+
+
+class HealthCheckMiddleware:
+    """Pure ASGI middleware that responds 200 to GET /health.
+
+    Sits outside the auth layer so Railway's network healthcheck
+    succeeds without a bearer token.
+    """
+
+    def __init__(self, app):
+        self.app = app
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and scope.get("path") == "/health" and scope.get("method") == "GET":
+            await send({"type": "http.response.start", "status": 200, "headers": [[b"content-type", b"application/json"]]})
+            await send({"type": "http.response.body", "body": b'{"status":"ok"}'})
+            return
+        await self.app(scope, receive, send)
+
+
+def add_health_check(app):
+    return HealthCheckMiddleware(app)

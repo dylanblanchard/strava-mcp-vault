@@ -5,7 +5,7 @@
   },
   "deploy": {
     "startCommand": "python server.py",
-    "healthcheckPath": "/mcp",
+    "healthcheckPath": "/health",
     "healthcheckTimeout": 30,
     "restartPolicyType": "ON_FAILURE"
   }
