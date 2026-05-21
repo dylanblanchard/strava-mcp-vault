@@ -86,7 +86,7 @@ async def lifespan(server):
     yield
 
 
-port = int(os.getenv("STRAVA_MCP_PORT", "18201"))
+port = int(os.getenv("PORT", os.getenv("STRAVA_MCP_PORT", "18201")))
 mcp = FastMCP("strava-vault", host="0.0.0.0", port=port, lifespan=lifespan)
 
 
