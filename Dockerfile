@@ -13,12 +13,8 @@ COPY --from=builder /install /usr/local
 
 COPY . .
 
-RUN useradd -r -m appuser && \
-    mkdir -p /app/data && \
-    chown appuser:appuser /app/data
+RUN mkdir -p /app/data
 
-USER appuser
-
-EXPOSE 18201
+EXPOSE 8080
 
 CMD ["python", "server.py"]
